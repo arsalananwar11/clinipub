@@ -5,7 +5,6 @@ from scipy import stats
 
 class ClinicalDataAuditor:
     """Analyzes a clinical dataset to classify variable types and assess distribution
-
     normality for automatic statistical test selection.
     """
 
