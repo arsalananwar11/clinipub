@@ -1,7 +1,7 @@
 # test_run.py
 import numpy as np
 import pandas as pd
-from clinipub import ClinicalDataAuditor, BivariateTestSelector
+from clinipub import ClinicalDataAuditor, BivariateTestSelector, TableOneAssembler
 
 np.random.seed(42)
 mock_df = pd.DataFrame(
@@ -35,3 +35,10 @@ for col in var_types["categorical"]:
     if col != "treatment":
         p_val = selector.test_categorical(col)
         print(f"Variable: {col:15} | Test: Chi-Square      | p-value: {p_val:.4f}")
+
+# 3. Assemble a structured Table 1 with descriptive statistics and p-values
+assembler = TableOneAssembler(mock_df, stratify_by="treatment")
+table1_df = assembler.build()
+
+print("\nAssembled Table 1 with Descriptive Statistics and Automated P-Values:")
+print(table1_df)
