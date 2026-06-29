@@ -19,7 +19,9 @@ class BivariateTestSelector:
             )
 
     def test_continuous(self, col: str, is_normal: bool) -> float:
-        """Executes the correct continuous test depending on normality and group count."""
+        """Executes the correct continuous test depending on normality and group count
+           and returns the p-value.
+        """
         # Split data by grouping variable values
         grouped_data = [
             self.data[self.data[self.stratify_by] == g][col].dropna()
@@ -45,7 +47,7 @@ class BivariateTestSelector:
 
     def test_categorical(self, col: str) -> float:
         """Executes a Chi-Square test or automatically falls back to Fisher's Exact Test
-        if any expected cell count is less than 5 (for 2x2 configurations).
+        if any expected cell count is less than 5 (for 2x2 configurations) and returns the p-value.
         """
         contingency_table = pd.crosstab(self.data[self.stratify_by], self.data[col])
 
