@@ -1,0 +1,23 @@
+[project]
+name = "clinipub"
+version = "0.1.0"
+description = "Transform clinical dataframes into publication-ready, beautifully styled tables for medical journals and manuscripts."
+authors = [
+  { name="Arsalan Anwar", email="arsalan.anwar.7777@gmail.com" },
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
