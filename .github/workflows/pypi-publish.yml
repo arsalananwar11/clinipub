@@ -1,4 +1,4 @@
-name: Publish to PyPI 📦
+name: Publish to `clinipub` on PyPI
 
 on:
   push:
