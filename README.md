@@ -18,7 +18,7 @@ Unlike existing packages, `clinipub` offers autonomous statistical decision-maki
 
 ---
 
-## 🛠️ Statistical Test Selection Matrix
+## Statistical Test Selection Matrix
 
 The framework automatically maps and executes your bivariate comparative analytics using the following clinical logic:
 
