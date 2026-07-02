@@ -10,7 +10,6 @@ from clinipub import (
 
 def run_pipeline():
     """Demonstrates an end-to-end pipeline for automated bivariate statistical analysis,
-
     structured Table 1 assembly, and missing data auditing.
     """
     np.random.seed(42)
