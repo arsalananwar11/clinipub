@@ -1,7 +1,7 @@
 # clinipub
 [![PyPI release](https://img.shields.io/pypi/v/clinipub)](https://pypi.org/project/clinipub/)
 [![GitHub release](https://img.shields.io/github/v/release/arsalananwar11/clinipub)](https://github.com/arsalananwar11/clinipub/releases)
-[![Work in progress](https://img.shields.io/badge/status-work_in_progress-yellowgreen)](https://github.com/arsalananwar11/clinipub)
+[![Tests](https://github.com/arsalananwar11/clinipub/actions/workflows/tests-suite.yml/badge.svg?branch=main)](https://github.com/arsalananwar11/clinipub/actions/workflows/tests-suite.yml)
 
 A Python package to transform clinical dataframes into publication-ready, beautifully styled tables for medical journals and manuscripts
 
