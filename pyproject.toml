@@ -1,18 +1,26 @@
 [project]
 name = "clinipub"
-version = "0.1.0"
+version = "0.1.2"
 description = "Transform clinical dataframes into publication-ready, beautifully styled tables for medical journals and manuscripts."
 authors = [
   { name="Arsalan Anwar", email="arsalan.anwar.7777@gmail.com" },
 ]
+license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
+keywords = ["table 1", "tableone", "missing data", "p value test", "clinical", "research", "publication", "medical", "statistics"]
 dependencies = [
     "pandas>=2.0.0",
     "numpy>=1.24.0",
     "scipy>=1.10.0",
     "jinja2>=3.0.0",
 ]
+
+[project.urls]
+"Homepage" = "https://github.com/arsalananwar11/clinipub"
+"Repository" = "https://github.com/arsalananwar11/clinipub"
+"Bug Tracker" = "https://github.com/arsalananwar11/clinipub/issues"
+"Documentation" = "https://github.com/arsalananwar11/clinipub#readme"
 
 [build-system]
 requires = ["hatchling"]
