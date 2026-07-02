@@ -35,44 +35,7 @@ def run_pipeline():
     mock_df.loc[mock_df.sample(frac=0.38).index, "days_to_event"] = np.nan
 
     print("=================================================================")
-    print(" STEP 1: AUDITING VARIABLE TYPES AND NORMALITY DISPOSITION       ")
-    print("=================================================================")
-    auditor = ClinicalDataAuditor(mock_df)
-    var_types = auditor.detect_variable_types()
-    normality = auditor.test_normality(var_types["continuous"])
-
-    print(f"Detected Categorical Variables: {var_types['categorical']}")
-    print(f"Detected Continuous Variables:  {var_types['continuous']}")
-    print(f"Continuous Normality Pass (True=Normal, False=Skewed): {normality}\n")
-
-    print("=================================================================")
-    print(" STEP 2: RUNNING AUTONOMOUS BIVARIATE STATISTICAL TESTS         ")
-    print("=================================================================")
-    selector = BivariateTestSelector(mock_df, stratify_by="treatment")
-
-    # Evaluate continuous variables
-    for col in var_types["continuous"]:
-        is_normal = normality[col]
-        test_results = selector.test_continuous(col, is_normal=is_normal)
-        print(f"Variable: {col:15} | Test: {test_results['test']:15} | p-value: {test_results['p_value']:.4f}")
-
-    # Evaluate categorical variables (ignoring treatment)
-    for col in var_types["categorical"]:
-        if col != "treatment":
-            p_cat_test_results = selector.test_categorical(col)
-            print(f"Variable: {col:15} | Test: {p_cat_test_results['test']:15} | p-value: {p_cat_test_results['p_value']:.4f}")
-    print()
-
-    print("=================================================================")
-    print(" STEP 3: ASSEMBLING STRUCTURED SUMMARY TABLE ONE                ")
-    print("=================================================================")
-    assembler = TableOneAssembler(mock_df, stratify_by="treatment")
-    table1_df = assembler.build()
-    print(table1_df)
-    print()
-
-    print("=================================================================")
-    print(" STEP 4: AUDITING MISSING DATA PATTERNS AND SAFETY BOUNDARIES   ")
+    print(" STEP 1: AUDITING MISSING DATA PATTERNS AND SAFETY BOUNDARIES   ")
     print("=================================================================")
     missing_auditor = MissingDataAuditor(mock_df)
 
@@ -90,6 +53,43 @@ def run_pipeline():
 
     print(f"\nSuccess! Missing data stats written to '{output_filename}'.")
     print("Open this file in your browser to inspect the color-coded safety badges.")
+    print()
+
+    print("=================================================================")
+    print(" STEP 2: AUDITING VARIABLE TYPES AND NORMALITY DISPOSITION       ")
+    print("=================================================================")
+    auditor = ClinicalDataAuditor(mock_df)
+    var_types = auditor.detect_variable_types()
+    normality = auditor.test_normality(var_types["continuous"])
+
+    print(f"Detected Categorical Variables: {var_types['categorical']}")
+    print(f"Detected Continuous Variables:  {var_types['continuous']}")
+    print(f"Continuous Normality Pass (True=Normal, False=Skewed): {normality}\n")
+
+    print("=================================================================")
+    print(" STEP 3: RUNNING AUTONOMOUS BIVARIATE STATISTICAL TESTS         ")
+    print("=================================================================")
+    selector = BivariateTestSelector(mock_df, stratify_by="treatment")
+
+    # Evaluate continuous variables
+    for col in var_types["continuous"]:
+        is_normal = normality[col]
+        test_results = selector.test_continuous(col, is_normal=is_normal)
+        print(f"Variable: {col:15} | Test: {test_results['test']:15} | p-value: {test_results['p_value']:.4f}")
+
+    # Evaluate categorical variables (ignoring treatment)
+    for col in var_types["categorical"]:
+        if col != "treatment":
+            p_cat_test_results = selector.test_categorical(col)
+            print(f"Variable: {col:15} | Test: {p_cat_test_results['test']:15} | p-value: {p_cat_test_results['p_value']:.4f}")
+    print()
+
+    print("=================================================================")
+    print(" STEP 4: ASSEMBLING STRUCTURED SUMMARY TABLE ONE                ")
+    print("=================================================================")
+    assembler = TableOneAssembler(mock_df, stratify_by="treatment")
+    table1_df = assembler.build()
+    print(table1_df)
     print("=================================================================")
 
 
