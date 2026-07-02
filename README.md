@@ -124,3 +124,7 @@ table1 = assembler.build()
   - `build()`
     - returns a styled `pandas.DataFrame` with stratified descriptive statistics and p-values
 
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on issues, pull requests, testing, and repository workflow.
+
