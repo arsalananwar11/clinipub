@@ -36,14 +36,14 @@ def test_bivariate_continuous_tests():
 
     # Both tests should yield significant p-values due to the clear age difference between groups
     # Parametric t-test pipeline
-    p_normal = selector.test_continuous("age", is_normal=True)
-    assert 0.0 < p_normal < 0.01
-    assert isinstance(p_normal, float)
+    p_normal_test_results = selector.test_continuous("age", is_normal=True)
+    assert 0.0 < p_normal_test_results["p_value"] < 0.01
+    assert isinstance(p_normal_test_results["p_value"], float)
 
     # Non-parametric Mann-Whitney pipeline
-    p_skewed = selector.test_continuous("age", is_normal=False)
-    assert 0.0 < p_skewed < 0.01 
-    assert isinstance(p_skewed, float)
+    p_skewed_test_results = selector.test_continuous("age", is_normal=False)
+    assert 0.0 < p_skewed_test_results["p_value"] < 0.01
+    assert isinstance(p_skewed_test_results["p_value"], float)
 
 
 def test_categorical_fishers_fallback():
@@ -56,7 +56,7 @@ def test_categorical_fishers_fallback():
         }
     )
     selector = BivariateTestSelector(df, stratify_by="arm")
-    p_val = selector.test_categorical("outcome")
+    p_cat_test_results = selector.test_categorical("outcome")
 
-    assert isinstance(p_val, float)
-    assert 0.0 <= p_val <= 1.0
+    assert isinstance(p_cat_test_results["p_value"], float)
+    assert 0.0 <= p_cat_test_results["p_value"] <= 1.0

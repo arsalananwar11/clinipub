@@ -40,13 +40,13 @@ class TableOneAssembler:
     def _assemble_continuous(self, col: str) -> list:
         """Calculates stratified summary statistics for a single continuous column."""
         is_normal = self.normality.get(col, False)
-        p_val = self.selector.test_continuous(col, is_normal)
+        test_results = self.selector.test_continuous(col, is_normal)
 
         row_data = {
             "Variable": col,
             "Distribution": "Cont. Normal" if is_normal else "Cont. Skewed",
             "Category": "Mean (SD)" if is_normal else "Median [IQR]",
-            "p-value": f"{p_val:.3f}" if p_val >= 0.001 else "<0.001",
+            "p-value": f"{test_results['p_value']:.3f}" if test_results['p_value'] >= 0.001 else "<0.001",
         }
 
         # Calculate metrics split by trial arm
@@ -69,8 +69,8 @@ class TableOneAssembler:
 
     def _assemble_categorical(self, col: str) -> list:
         """Calculates stratified counts and percentages for a single categorical column."""
-        p_val = self.selector.test_categorical(col)
-        p_str = f"{p_val:.3f}" if p_val >= 0.001 else "<0.001"
+        p_cat_test_results = self.selector.test_categorical(col)
+        p_str = f"{p_cat_test_results['p_value']:.3f}" if p_cat_test_results['p_value'] >= 0.001 else "<0.001"
 
         # Get ordered categories, ignoring NaNs
         categories = sorted(self.data[col].dropna().unique())
@@ -97,7 +97,9 @@ class TableOneAssembler:
         return rows
 
     def build(self) -> pd.DataFrame:
-        """Executes full assembly and sets up the final MultiIndex hierarchy layout."""
+        """Executes full assembly and sets up the final MultiIndex hierarchy layout.
+        
+        Returns a pandas DataFrame with a MultiIndex on rows and stratified columns"""
         all_rows = []
 
         # Process variables sequentially

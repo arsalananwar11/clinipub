@@ -15,8 +15,11 @@ class ClinicalDataAuditor:
 
     def detect_variable_types(self, max_categorical_threshold: int = 10) -> dict:
         """Classifies columns into 'categorical' or 'continuous'.
-
         Safely handles modern Pandas extension data types (like StringDtype).
+
+        Returns a dictionary with two keys: 
+        - `categorical`: A list of column names classified as categorical.
+        - `continuous`: A list of column names classified as continuous.
         """
         classification = {"categorical": [], "continuous": []}
 
@@ -51,7 +54,10 @@ class ClinicalDataAuditor:
     def test_normality(self, continuous_cols: list, alpha: float = 0.05) -> dict:
         """Runs a Shapiro-Wilk normality test on continuous variables.
 
-        Returns True if Normal (Parametric), False if Skewed (Non-Parametric).
+        Returns a dictionary with column names as keys and boolean values indicating normality.
+        Columns with fewer than 3 non-null observations are automatically classified as non-normal.
+        - True indicates the variable is normally distributed (p >= alpha)
+        - False indicates the variable is not normally distributed (p < alpha)
         """
         normality_results = {}
 
