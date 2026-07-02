@@ -1,4 +1,4 @@
-name: `clinipub` Tests Suite
+name: clinipub Tests Suite
 
 on:
   push:
