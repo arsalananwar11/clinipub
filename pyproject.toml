@@ -9,6 +9,16 @@ license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["table 1", "tableone", "missing data", "p value test", "clinical", "research", "publication", "medical", "statistics"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Scientific/Engineering :: Medical Science Apps",
+]
 dependencies = [
     "pandas>=2.0.0",
     "numpy>=1.24.0",
