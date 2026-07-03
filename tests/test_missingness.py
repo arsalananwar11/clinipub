@@ -58,6 +58,7 @@ def test_html_report_generation_with_and_without_precomputed_df():
 
 
 def test_mcar_no_missing_values():
+    """Ensures MCAR returns neutral results for a completely observed dataset."""
     df = pd.DataFrame({"age": [20, 30, 40], "bp": [120, 130, 140]})
     auditor = MissingDataAuditor(df)
     results = auditor.run_mcar_test()
@@ -67,6 +68,7 @@ def test_mcar_no_missing_values():
 
 
 def test_mcar_systematic_missingness_rejection():
+    """Verifies MCAR detects systematic missingness and rejects the null hypothesis."""
     np.random.seed(42)
     n = 200
     age = np.random.normal(50, 10, n)
@@ -80,4 +82,24 @@ def test_mcar_systematic_missingness_rejection():
 
     assert results["p_value"] < 0.05
     assert results["statistic"] > 0
+    assert results["degrees_of_freedom"] > 0
+
+
+def test_mcar_random_missingness_acceptance():
+    """Confirms MCAR accepts randomly missing data as consistent with MCAR."""
+    np.random.seed(0)
+    n = 1000
+    df = pd.DataFrame(
+        {
+            "age": np.random.normal(50, 8, n),
+            "bp": np.random.normal(120, 12, n),
+        }
+    )
+    df.loc[np.random.rand(n) < 0.1, "age"] = np.nan
+    df.loc[np.random.rand(n) < 0.1, "bp"] = np.nan
+
+    auditor = MissingDataAuditor(df)
+    results = auditor.run_mcar_test()
+
+    assert results["p_value"] > 0.05
     assert results["degrees_of_freedom"] > 0
