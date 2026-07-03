@@ -115,51 +115,58 @@ class MissingDataAuditor:
         if numeric_data.empty or numeric_data.isnull().sum().sum() == 0:
             return {"statistic": 0.0, "p_value": 1.0, "degrees_of_freedom": 0}
 
-        global_mean = numeric_data.mean()
-        global_cov = numeric_data.cov()
+        # Vectorized calculations via underlying NumPy arrays
+        X = numeric_data.values
+        n_samples, n_features = X.shape
 
-        # If the covariance matrix is singular (determinant = 0), add a small diagonal value to stabilize inversion
-        if np.linalg.det(global_cov.values) == 0:
-            global_cov += np.diag(np.ones(global_cov.shape[0]) * 1e-6)
+        global_mean = np.nanmean(X, axis=0)
+        
+        # Fast covariance computation skipping NaNs pairwise or via global fill
+        # For global inversion structural integrity, we use an efficient mean-fill covariance matrix
+        X_filled = np.where(np.isnan(X), global_mean, X)
+        global_cov = np.cov(X_filled, rowvar=False)
 
-        # Invert the global covariance matrix for Mahalanobis distance calculations
-        inv_global_cov = np.linalg.inv(global_cov.values)
+        # Inversion with ridge regularization guardrail
+        if np.linalg.det(global_cov) == 0:
+            global_cov += np.diag(np.ones(n_features) * 1e-6)
+        inv_global_cov = np.linalg.inv(global_cov)
 
-        # Create a binary mask for missing values and generate unique missingness patterns
-        missing_mask = numeric_data.isnull()
-        pattern_labels = missing_mask.apply(
-            lambda r: "".join(r.astype(int).astype(str)), axis=1
-        )
+        # Fast Vectorized Pattern Detection: Instead of iterating over rows, we identify unique missingness patterns and their counts
+        missing_mask = np.isnan(X)
+        unique_patterns, inverse_indices = np.unique(missing_mask, axis=0, return_inverse=True)
 
-        # Initialize accumulators for the Chi-Square statistic and degrees of freedom
         chi_sq_stat = 0.0
         degrees_of_freedom = 0
 
-        for pattern, group_idx in pattern_labels.groupby(pattern_labels).groups.items():
-            sub_df = numeric_data.loc[group_idx]
-            n_pattern = len(sub_df)
+        # Loop only over UNIQUE missingness configurations (typically very small, e.g., < 50 patterns)
+        for pattern_idx, pattern in enumerate(unique_patterns):
+            # Locate all row indices belonging to this specific missingness configuration
+            group_mask = (inverse_indices == pattern_idx)
+            n_pattern = np.sum(group_mask)
 
-            observed_cols = [
-                col
-                for col in numeric_data.columns
-                if pattern[numeric_data.columns.get_loc(col)] == "0"
-            ]
-
-            if not observed_cols:
+            # Identify completely observed columns in this pattern (where missing is False)
+            obs_indices = np.where(~pattern)[0]
+            if len(obs_indices) == 0:
                 continue
 
-            obs_indices = [numeric_data.columns.get_loc(c) for c in observed_cols]
+            # Directly extract slice of rows matching this pattern using mask indexing
+            sub_X_obs = X[group_mask[:, None] & ~missing_mask]
+            # Reshape securely to match matrix requirements
+            sub_X_obs = sub_X_obs.reshape(n_pattern, len(obs_indices))
 
-            pattern_mean = sub_df[observed_cols].mean()
-            diff_vector = (pattern_mean - global_mean[observed_cols]).values
+            # Compute localized mean via highly efficient NumPy math
+            pattern_mean = np.mean(sub_X_obs, axis=0)
+            diff_vector = pattern_mean - global_mean[obs_indices]
 
+            # Slice inverse covariance matrix using NumPy meshgrid indexing
             sub_inv_cov = inv_global_cov[np.ix_(obs_indices, obs_indices)]
 
+            # Mahalanobis matrix distance multiplication
             pattern_chi_sq = n_pattern * (diff_vector @ sub_inv_cov @ diff_vector)
             chi_sq_stat += pattern_chi_sq
-            degrees_of_freedom += len(observed_cols)
+            degrees_of_freedom += len(obs_indices)
 
-        degrees_of_freedom = max(1, degrees_of_freedom - numeric_data.shape[1])
+        degrees_of_freedom = max(1, degrees_of_freedom - n_features)
         p_value = 1.0 - stats.chi2.cdf(chi_sq_stat, degrees_of_freedom)
 
         return {
