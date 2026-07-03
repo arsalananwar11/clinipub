@@ -68,7 +68,12 @@ class ClinicalDataAuditor:
                 normality_results[col] = False
                 continue
 
-            _, p_value = stats.shapiro(clean_data)
+            if len(clean_data) <= 5000:
+                _, p_value = stats.shapiro(clean_data)
+            else:
+                print(f"Warning: Column '{col}' has {len(clean_data)} samples. Shapiro-Wilk may be unreliable for large datasets. Using D'Agostino's K-squared test instead. Results may be less sensitive to subtle deviations from normality.")
+                _, p_value = stats.normaltest(clean_data)
+            
             normality_results[col] = bool(p_value >= alpha)
 
         return normality_results
