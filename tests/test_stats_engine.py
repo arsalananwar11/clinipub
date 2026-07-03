@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+import warnings
 from clinipub import ClinicalDataAuditor
 
 
@@ -58,3 +59,17 @@ def test_normality_native_boolean_return():
     assert results["normal_var"] is True
     assert results["skewed_var"] is False
     assert results["short_var"] is False
+
+
+def test_normality_large_sample_uses_full_dataset_without_warning():
+    """Ensures large-sample normality testing retains the original data and avoids Shapiro warnings."""
+    np.random.seed(0)
+    df = pd.DataFrame({"normal_var": np.random.normal(0, 1, 500000)})
+
+    auditor = ClinicalDataAuditor(df)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        results = auditor.test_normality(["normal_var"])
+
+    assert isinstance(results["normal_var"], bool)
