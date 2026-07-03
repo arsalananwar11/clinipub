@@ -1,8 +1,10 @@
 # clinipub
 
+[![DOI](https://zenodo.org/badge/1283440630.svg)](https://doi.org/10.5281/zenodo.21158151)
 [![PyPI release](https://img.shields.io/pypi/v/clinipub)](https://pypi.org/project/clinipub/)
 [![GitHub release](https://img.shields.io/github/v/release/arsalananwar11/clinipub)](https://github.com/arsalananwar11/clinipub/releases)
 [![Tests](https://github.com/arsalananwar11/clinipub/actions/workflows/tests-suite.yml/badge.svg?branch=main)](https://github.com/arsalananwar11/clinipub/actions/workflows/tests-suite.yml)
+
 
 A lightweight Python toolkit that turns clinical `pandas.DataFrame` datasets into publication-ready Table 1 summaries and missing-data audits.
 
