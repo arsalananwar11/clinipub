@@ -13,15 +13,16 @@ def run_pipeline():
     structured Table 1 assembly, and missing data auditing.
     """
     np.random.seed(42)
-    n_samples = 150
+    n_samples = 500
 
     # 1. Generate clean mock clinical trial baseline data
     mock_df = pd.DataFrame(
         {
             "age": np.random.normal(loc=60, scale=12, size=n_samples),
             "days_to_event": np.random.exponential(scale=30, size=n_samples),
-            "treatment": np.random.choice(["Drug A", "Placebo"], size=n_samples),
+            "biomarker_level": np.random.normal(loc=5, scale=1.5, size=n_samples),
             "smoker_status": np.random.choice(["Yes", "No"], size=n_samples),
+            "treatment": np.random.choice(["Drug A", "Placebo"], size=n_samples),
         }
     )
 
@@ -51,8 +52,14 @@ def run_pipeline():
         f.write(html_report)
 
     print(f"\nSuccess! Missing data stats written to '{output_filename}'.")
-    print("Open this file in your browser to inspect the color-coded safety badges.")
-    print()
+    print("Open this file in your browser to inspect the color-coded safety badges.\n")
+
+    # MCAR test right from the same auditor instance
+    mcar_res = missing_auditor.run_mcar_test()
+
+    print(f"Little's Chi-Square Statistic: {mcar_res['statistic']:.2f}")
+    print(f"Calculated p-value:           {mcar_res['p_value']:.4f}")
+    print(f"Degrees of Freedom:           {mcar_res['degrees_of_freedom']}\n")
 
     print("=================================================================")
     print(" STEP 2: AUDITING VARIABLE TYPES AND NORMALITY DISPOSITION       ")
