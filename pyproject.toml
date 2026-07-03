@@ -1,6 +1,6 @@
 [project]
 name = "clinipub"
-version = "0.1.2"
+version = "0.1.3"
 description = "Transform clinical dataframes into publication-ready, beautifully styled tables for medical journals and manuscripts."
 authors = [
   { name="Arsalan Anwar", email="arsalan.anwar.7777@gmail.com" },
@@ -8,7 +8,16 @@ authors = [
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = ["table 1", "tableone", "missing data", "p value test", "clinical", "research", "publication", "medical", "statistics"]
+keywords = ["table 1", "tableone", "missing data", "p value test", "clinical research", "publication", "medical", "statistics", "data analysis"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
 dependencies = [
     "pandas>=2.0.0",
     "numpy>=1.24.0",
