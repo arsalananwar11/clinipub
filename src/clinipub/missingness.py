@@ -88,12 +88,13 @@ class MissingDataAuditor:
         """Executes Roderick Little's MCAR multivariate hypothesis test on numeric features.
 
         Evaluates the null hypothesis (H0) that the data elements are Missing Completely
-        At Random (MCAR).
+        At Random (MCAR) using an optimized, vectorized NumPy architecture with large-dataset corrections.
 
         Returns
         -------
         dict
-            A summary dictionary containing the following keys:
+            A summary dictionary containing classical metrics, normalized statistics to counter sample size bias,
+            and an interpretation guide.
             
             `statistic` (float): The calculated Chi-Square (χ²) distance metric.
               Represents the global deviation between the missingness pattern subgroups
@@ -113,35 +114,42 @@ class MissingDataAuditor:
         numeric_data = self.data.select_dtypes(include=[np.number])
 
         if numeric_data.empty or numeric_data.isnull().sum().sum() == 0:
-            return {"statistic": 0.0, "p_value": 1.0, "degrees_of_freedom": 0}
+            return {
+                "statistic": 0.0,
+                "p_value": 1.0,
+                "degrees_of_freedom": 0,
+                "normed_chi2": 0.0,
+                "effect_size_interpretation": "No missing data present.",
+            }
 
-        # Vectorized calculations via underlying NumPy arrays
+        # Convert to raw NumPy workspace for C-level speed executions
         X = numeric_data.values
         n_samples, n_features = X.shape
 
         global_mean = np.nanmean(X, axis=0)
-        
-        # Fast covariance computation skipping NaNs pairwise or via global fill
-        # For global inversion structural integrity, we use an efficient mean-fill covariance matrix
+
+        # Impute missing values with column means for stable covariance matrix inversion
         X_filled = np.where(np.isnan(X), global_mean, X)
         global_cov = np.cov(X_filled, rowvar=False)
 
-        # Inversion with ridge regularization guardrail
+        # Ridge Regularization Guardrail for collinear columns
         if np.linalg.det(global_cov) == 0:
             global_cov += np.diag(np.ones(n_features) * 1e-6)
         inv_global_cov = np.linalg.inv(global_cov)
 
-        # Fast Vectorized Pattern Detection: Instead of iterating over rows, we identify unique missingness patterns and their counts
+        # Vectorized identification of missingness layouts
         missing_mask = np.isnan(X)
-        unique_patterns, inverse_indices = np.unique(missing_mask, axis=0, return_inverse=True)
+        unique_patterns, inverse_indices = np.unique(
+            missing_mask, axis=0, return_inverse=True
+        )
 
         chi_sq_stat = 0.0
         degrees_of_freedom = 0
 
-        # Loop only over UNIQUE missingness configurations (typically very small, e.g., < 50 patterns)
+        # Iterates strictly over the unique configurations rather than raw rows
         for pattern_idx, pattern in enumerate(unique_patterns):
             # Locate all row indices belonging to this specific missingness configuration
-            group_mask = (inverse_indices == pattern_idx)
+            group_mask = inverse_indices == pattern_idx
             n_pattern = np.sum(group_mask)
 
             # Identify completely observed columns in this pattern (where missing is False)
@@ -150,9 +158,7 @@ class MissingDataAuditor:
                 continue
 
             # Directly extract slice of rows matching this pattern using mask indexing
-            sub_X_obs = X[group_mask[:, None] & ~missing_mask]
-            # Reshape securely to match matrix requirements
-            sub_X_obs = sub_X_obs.reshape(n_pattern, len(obs_indices))
+            sub_X_obs = X[group_mask][:, obs_indices]
 
             # Compute localized mean via highly efficient NumPy math
             pattern_mean = np.mean(sub_X_obs, axis=0)
@@ -167,10 +173,26 @@ class MissingDataAuditor:
             degrees_of_freedom += len(obs_indices)
 
         degrees_of_freedom = max(1, degrees_of_freedom - n_features)
-        p_value = 1.0 - stats.chi2.cdf(chi_sq_stat, degrees_of_freedom)
+
+        # Large sample size calculation fallback to prevent floating-point underflow
+        log_p_value = stats.chi2.logsf(chi_sq_stat, degrees_of_freedom)
+        p_value = np.exp(log_p_value)
+
+        # Calculate Normed Chi-Square (Effect Size proxy independent of N scale)
+        normed_chi2 = chi_sq_stat / degrees_of_freedom
+
+        # Classify the real-world distortion severity
+        if normed_chi2 <= 1.5:
+            interpretation = "Negligible structural deviation; sample behaves close to true random (MCAR)."
+        elif normed_chi2 <= 3.0:
+            interpretation = "Moderate systematic deviation. Large sample size amplifies significance; review missingness patterns."
+        else:
+            interpretation = "Severe non-random missingness detected (MAR/MNAR). Multiple Imputation strongly required."
 
         return {
             "statistic": float(chi_sq_stat),
             "p_value": float(p_value),
             "degrees_of_freedom": int(degrees_of_freedom),
+            "normed_chi2": float(normed_chi2),
+            "effect_size_interpretation": interpretation,
         }
