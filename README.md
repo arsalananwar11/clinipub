@@ -20,6 +20,8 @@ Baseline tables and missingness audits are essential in clinical research, but m
 - `ClinicalDataAuditor`: detect categorical vs continuous variables and test continuous normality
 - `BivariateTestSelector`: select the appropriate clinical test automatically for continuous and categorical comparisons
 - `TableOneAssembler`: assemble a stratified Table 1 with descriptive statistics and p-values
+- `JournalHTMLExporter`: export journal-formatted HTML tables for manuscript-ready output
+- `JournalDocxExporter`: save publication-ready tables directly to `.docx`
 
 ## Installation
 
@@ -46,36 +48,64 @@ from clinipub import (
     ClinicalDataAuditor,
     BivariateTestSelector,
     TableOneAssembler,
+    JournalHTMLExporter,
+    JournalDocxExporter,
 )
 
-# Load clinical data
-
+# Load your clinical dataset. Update the filepath to your own CSV file.
+print("Loading dataset...")
 df = pd.read_csv("baseline.csv")
+print(f"Loaded {len(df)} rows and {len(df.columns)} columns")
 
-# Audit missing data and run Little's MCAR test
+# 1. Audit missing data
+print("\nCalculating missingness...")
 missing_auditor = MissingDataAuditor(df)
 missing_df = missing_auditor.calculate_missingness()
-mcar_results = missing_auditor.run_mcar_test()
+print(missing_df)
 
-html_report = missing_auditor.to_html_report(
-    audit_df=missing_df,
-    thresholds={"low": 1.0, "mid": 20.0},
-)
+print("\nWriting missing data report to missing_data_stats.html...")
+missing_html = missing_auditor.to_html_report(audit_df=missing_df)
+with open("missing_data_stats.html", "w") as f:
+    f.write(missing_html)
+print("Saved missing_data_stats.html")
 
-# Detect variable types and assess normality
-auditor = ClinicalDataAuditor(df)
-var_types = auditor.detect_variable_types()
-normality = auditor.test_normality(var_types["continuous"])
+# 2. Detect variable types and assess normality
+print("\nDetecting variable types...")
+clinical_auditor = ClinicalDataAuditor(df)
+var_types = clinical_auditor.detect_variable_types()
+print("Categorical:", var_types["categorical"])
+print("Continuous:", var_types["continuous"])
 
-# Select and execute bivariate tests
-selector = BivariateTestSelector(df, stratify_by="treatment")
-continuous_result = selector.test_continuous("age", is_normal=normality["age"])
-cat_result = selector.test_categorical("smoker_status")
+print("\nTesting normality for continuous variables...")
+normality = clinical_auditor.test_normality(var_types["continuous"])
+print(normality)
 
-# Assemble publication-ready Table 1
+# 3. Select appropriate bivariate tests
+print("\nRunning bivariate tests stratified by treatment...")
+test_selector = BivariateTestSelector(df, stratify_by="treatment")
+print("Age test:", test_selector.test_continuous("age", is_normal=normality.get("age", False)))
+print("Smoker status test:", test_selector.test_categorical("smoker_status"))
+
+# 4. Assemble a publication-ready Table 1
+print("\nAssembling Table 1...")
 assembler = TableOneAssembler(df, stratify_by="treatment")
 table1 = assembler.build()
+print(table1)
+
+# 5. Export publication-ready output
+print("\nExporting journal-ready HTML (NEJM style shown as an example)...")
+html_exporter = JournalHTMLExporter(table1, journal="nejm")
+with open("table1_nejm_style.html", "w") as f:
+    f.write(html_exporter.export())
+print("Saved table1_nejm_style.html")
+
+print("\nExporting manuscript-ready DOCX...")
+docx_exporter = JournalDocxExporter(table1, journal="nejm")
+docx_exporter.save("table1_nejm_manuscript.docx")
+print("Saved table1_nejm_manuscript.docx")
 ```
+
+For a full end-to-end pipeline example, see [examples/pipeline.py](examples/pipeline.py).
 
 ## API overview
 
@@ -94,6 +124,12 @@ table1 = assembler.build()
 
 - `TableOneAssembler(data: pd.DataFrame, stratify_by: str, columns: list = None)`
   - `build()` → styled `pandas.DataFrame` with stratified descriptive statistics and p-values
+
+- `JournalHTMLExporter(table_df: pd.DataFrame, journal: str = "nejm")`
+  - `export()` → HTML string for journal-formatted table output
+
+- `JournalDocxExporter(table_df: pd.DataFrame, journal: str = "nejm")`
+  - `save(path: str)` → write a Word `.docx` table file
 
 ## Developer workflow
 
