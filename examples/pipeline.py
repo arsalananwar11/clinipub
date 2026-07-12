@@ -100,7 +100,7 @@ def run_pipeline():
     print()
 
     print("=================================================================")
-    print(" STEP 6: EXPORTING PUBLICATION-READY JOURNAL HTML TABLES          ")
+    print(" STEP 5: EXPORTING PUBLICATION-READY JOURNAL HTML TABLES          ")
     print("=================================================================")    
     # Pass our compiled Table 1 into the NEJM styling layout
     exporter = JournalHTMLExporter(table1_df, journal="nejm")
@@ -110,6 +110,18 @@ def run_pipeline():
         f.write(nejm_table_html)
         
     print("Success! Styled 'table1_nejm_style.html' created.")
+    print()
+
+    print("=================================================================")
+    print(" STEP 6: EXPORTING NATIVE MICROSOFT WORD TABLE (.DOCX)          ")
+    print("=================================================================")
+    from clinipub import JournalDocxExporter
+    
+    docx_file = "table1_nejm_manuscript.docx"
+    docx_exporter = JournalDocxExporter(table1_df, journal="nejm")
+    docx_exporter.save(docx_file)
+    
+    print(f"Success! Native manuscript table written directly to: '{docx_file}'")
     print("=================================================================")
 
 
