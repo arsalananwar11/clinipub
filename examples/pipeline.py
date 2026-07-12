@@ -60,7 +60,10 @@ def run_pipeline():
 
     print(f"Little's Chi-Square Statistic: {mcar_res['statistic']:.2f}")
     print(f"Calculated p-value:           {mcar_res['p_value']:.4f}")
-    print(f"Degrees of Freedom:           {mcar_res['degrees_of_freedom']}\n")
+    print(f"Degrees of Freedom:           {mcar_res['degrees_of_freedom']}")
+    print(f"Normed Chi-Square:             {mcar_res['normed_chi2']:.4f}")
+    print(f"Effect Size Interpretation:   {mcar_res['effect_size_interpretation']}\n")
+    print("Note: p < 0.05 indicates systematic missingness (MAR/MNAR).")
 
     print("=================================================================")
     print(" STEP 2: AUDITING VARIABLE TYPES AND NORMALITY DISPOSITION       ")

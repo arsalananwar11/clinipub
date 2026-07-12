@@ -103,3 +103,6 @@ def test_mcar_random_missingness_acceptance():
 
     assert results["p_value"] > 0.05
     assert results["degrees_of_freedom"] > 0
+    assert results["normed_chi2"] >= 0.0
+    assert results["effect_size_interpretation"] == "Negligible structural deviation; sample behaves close to true random (MCAR)."
+    assert isinstance(results["statistic"], float)
