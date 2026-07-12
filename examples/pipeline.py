@@ -3,6 +3,7 @@ import pandas as pd
 from clinipub import (
     BivariateTestSelector,
     ClinicalDataAuditor,
+    JournalHTMLExporter,
     MissingDataAuditor,
     TableOneAssembler,
 )
@@ -96,7 +97,21 @@ def run_pipeline():
     assembler = TableOneAssembler(mock_df, stratify_by="treatment")
     table1_df = assembler.build()
     print(table1_df)
+    print()
+
     print("=================================================================")
+    print(" STEP 6: EXPORTING PUBLICATION-READY JOURNAL HTML TABLES          ")
+    print("=================================================================")    
+    # Pass our compiled Table 1 into the NEJM styling layout
+    exporter = JournalHTMLExporter(table1_df, journal="nejm")
+    nejm_table_html = exporter.export()
+    
+    with open("table1_nejm_style.html", "w") as f:
+        f.write(nejm_table_html)
+        
+    print("Success! Styled 'table1_nejm_style.html' created.")
+    print("=================================================================")
+
 
 
 if __name__ == "__main__":
