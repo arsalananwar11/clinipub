@@ -103,7 +103,7 @@ def run_pipeline():
     print(" STEP 6: EXPORTING PUBLICATION-READY JOURNAL HTML TABLES          ")
     print("=================================================================")    
     # Pass our compiled Table 1 into the NEJM styling layout
-    exporter = JournalHTMLExporter(table1_df, journal="lancet")
+    exporter = JournalHTMLExporter(table1_df, journal="nejm")
     nejm_table_html = exporter.export()
     
     with open("table1_nejm_style.html", "w") as f:
