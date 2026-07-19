@@ -1,6 +1,6 @@
 [project]
 name = "clinipub"
-version = "0.1.5"
+version = "0.1.6-pre"
 description = "Transform clinical dataframes into publication-ready, beautifully styled tables for medical journals and manuscripts."
 authors = [
   { name="Arsalan Anwar", email="arsalan.anwar.7777@gmail.com" },
