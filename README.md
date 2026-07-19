@@ -4,6 +4,7 @@
 [![PyPI release](https://img.shields.io/pypi/v/clinipub)](https://pypi.org/project/clinipub/)
 [![GitHub release](https://img.shields.io/github/v/release/arsalananwar11/clinipub)](https://github.com/arsalananwar11/clinipub/releases)
 [![Tests](https://github.com/arsalananwar11/clinipub/actions/workflows/tests-suite.yml/badge.svg?branch=main)](https://github.com/arsalananwar11/clinipub/actions/workflows/tests-suite.yml)
+[![Security Scan](https://github.com/arsalananwar11/clinipub/actions/workflows/security_scan.yml/badge.svg?branch=main)](https://github.com/arsalananwar11/clinipub/actions/workflows/security_scan.yml)
 
 
 A lightweight Python toolkit that turns clinical `pandas.DataFrame` datasets into publication-ready Table 1 summaries and missing-data audits.
@@ -39,6 +40,15 @@ cd clinipub
 uv sync
 ```
 
+## Compliance, Privacy, and Data Isolation
+
+`clinipub` is designed to support the security requirements of sensitive biomedical and clinical registry environments. 
+
+*   **Local Processing:** This software operates entirely in your local runtime memory environment via compiled Python, NumPy, and SciPy layers. It does not contain external telemetry tracking, background logging, or outbound network calls.
+*   **Air-Gapped Compatibility:** Because the package functions entirely offline without requiring internet access to run statistical computations, it is inherently compatible with air-gapped hospital environments and local data privacy workflows.
+*   **Compliance Framework Support:** The self-contained architecture of this tool means it does not ingest, intercept, or transfer Protected Health Information (PHI). While the library assists researchers by providing an automated Software Bill of Materials (SBOM) for security auditing, **compliance with local institutional frameworks (such as HIPAA, GDPR, or IRB approvals) remains the sole responsibility of the deploying investigator and institution.**
+
+*Disclaimer: This software is provided under the MIT License "as is" without warranty of any kind. Users are fully responsible for ensuring their usage complies with institutional data governance policies.*
 ## Quick start
 
 ```python

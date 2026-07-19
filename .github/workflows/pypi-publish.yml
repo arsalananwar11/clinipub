@@ -9,10 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     
-    # Required permissions for Trusted Publishing (OIDC) authentication
+    # Required permissions for Trusted Publishing (OIDC) authentication AND creating GitHub Release artifacts
     permissions:
       id-token: write
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout Source Code
@@ -34,8 +34,27 @@ jobs:
           uv sync
           uv run pytest
 
-      - name: Build Distribution Packages 🏗️
+      - name: Build Distribution Packages
         run: uv build
 
+      # Software Bill of Materials (SBOM) for all production releases for clinical security compliance teams
+      # Generates a CycloneDX SBOM artifact for the current release tag
+      - name: Generate Software Bill of Materials (SBOM)
+        uses: anchore/sbom-action@v0
+        with:
+          path: "."
+          format: "cyclonedx-json"
+          output-file: "clinipub-${{ github.ref_name }}-sbom.json"
+
+      - name: Create GitHub Release and Attach SBOM Artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "clinipub-${{ github.ref_name }}-sbom.json"
+          name: "Release ${{ github.ref_name }}"
+          body: "Official release of `clinipub` version ${{ github.ref_name }}. The enterprise-required CycloneDX Software Bill of Materials (SBOM) is attached below for security compliance teams."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # PyPI Deployment
       - name: Publish Package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
