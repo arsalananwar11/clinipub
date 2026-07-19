@@ -42,7 +42,7 @@ jobs:
       - name: Generate Software Bill of Materials (SBOM)
         uses: anchore/sbom-action@v0
         with:
-          path: "."
+          path: "./src"
           format: "cyclonedx-json"
           output-file: "clinipub-${{ github.ref_name }}-sbom.json"
 
