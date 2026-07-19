@@ -50,7 +50,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: "clinipub-${{ github.ref_name }}-sbom.json"
-          name: "Release ${{ github.ref_name }}"
+          name: "${{ github.ref_name }}"
+          generate_release_notes: true
           body: "Official release of `clinipub` version ${{ github.ref_name }}. The enterprise-required CycloneDX Software Bill of Materials (SBOM) is attached below for security compliance teams."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
